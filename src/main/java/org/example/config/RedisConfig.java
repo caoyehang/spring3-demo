@@ -1,6 +1,5 @@
 package org.example.config;
 
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,35 +13,37 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
- * 作者：leo
- * 描述：配置redis序列化
- * 如果不配置序列化的话，我们在redis数据库中存储的数据可能以乱码形式显示出来，不方便我们判断数据存储的正确性，
- * 说白了就是序列化以后存进去的是什么，查询出来的就是什么，否则我们的键值都会变成一串看不懂的乱码。
+ * RedisTemplate 序列化配置。
+ * <p>
+ * Key 使用字符串序列化，Value 使用 JSON 序列化，便于在 Redis 中直接查看可读数据。
  */
 @Configuration
 public class RedisConfig {
+    /**
+     * 项目统一使用的 RedisTemplate。
+     */
     @Bean
-    public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
-        // 设置value的序列化方式json
         redisTemplate.setValueSerializer(redisSerializer());
-        //设置key序列化方式String
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        //设置hash key序列化方式String
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        //设置hash value序列化json
         redisTemplate.setHashValueSerializer(redisSerializer());
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
 
+    /**
+     * JSON 序列化器，支持普通对象写入 Redis。
+     */
     public RedisSerializer<Object> redisSerializer() {
-        //创建JSON序列化器
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        //必须设置，否则无法序列化实体类对象
-        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
+        objectMapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL
+        );
         return new GenericJackson2JsonRedisSerializer(objectMapper);
     }
 }

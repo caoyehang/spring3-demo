@@ -1,6 +1,5 @@
 package org.example.utils;
 
-
 import cn.hutool.json.JSONUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -15,82 +14,62 @@ import java.util.Calendar;
 import java.util.UUID;
 
 /**
- *  * 作者：Leo
- * 生成token以及校验token相关方法
+ * JWT 工具类。
+ * <p>
+ * 使用 RSA 私钥签发 token，使用 RSA 公钥解析 token。
  */
 public class JwtUtils {
-
     private static final String JWT_PAYLOAD_USER_KEY = "user";
 
     /**
-     * 私钥加密token
-     * @param userInfo   载荷中的数据
-     * @param privateKey 私钥
-     * @param expire     过期时间，单位分钟
-     * @return JWT
+     * 生成分钟级过期时间的 JWT。
      */
     public static String generateTokenExpireInMinutes(Object userInfo, PrivateKey privateKey, int expire) {
-        //计算过期时间
-        Calendar c = Calendar.getInstance();
-        c.add(Calendar.MINUTE,expire);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, expire);
 
         return Jwts.builder()
                 .claim(JWT_PAYLOAD_USER_KEY, JSONUtil.toJsonStr(userInfo))
-                .setId(new String(Base64.getEncoder().encode(UUID.randomUUID().toString().getBytes())))
-                .setExpiration(c.getTime())
+                .setId(Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes()))
+                .setExpiration(calendar.getTime())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
     }
 
     /**
-     * 私钥加密token
-     * @param userInfo   载荷中的数据
-     * @param privateKey 私钥
-     * @param expire     过期时间，单位秒
-     * @return JWT
+     * 生成秒级过期时间的 JWT，适合短期 token 场景。
      */
     public static String generateTokenExpireInSeconds(Object userInfo, PrivateKey privateKey, int expire) {
-        //计算过期时间
-        Calendar c = Calendar.getInstance();
-        c.add(Calendar.SECOND,expire);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, expire);
 
-        return Jwts.builder()  //{"user":"{id:12,name:jack}"}
+        return Jwts.builder()
                 .claim(JWT_PAYLOAD_USER_KEY, JSONUtil.toJsonStr(userInfo))
-                .setId(new String(Base64.getEncoder().encode(UUID.randomUUID().toString().getBytes())))
-                .setExpiration(c.getTime())
+                .setId(Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes()))
+                .setExpiration(calendar.getTime())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
     }
 
-
-
-
-
-
     /**
-     * 获取token中的用户信息
+     * 从 JWT 中解析用户信息。
      *
-     * @param token     用户请求中的令牌
-     * @param publicKey 公钥
-     * @return 用户信息
+     * @param token     请求中的 token
+     * @param publicKey RSA 公钥
+     * @param userType  要转换成的用户类型
      */
-    public static  Object getInfoFromToken(String token, PublicKey publicKey, Class userType)  {
-        //解析token
+    public static Object getInfoFromToken(String token, PublicKey publicKey, Class<?> userType) {
         try {
-            Jws<Claims> claimsJws = Jwts.parser().setSigningKey(publicKey).parseClaimsJws(token);
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .build()
+                    .parseClaimsJws(token);
 
             Claims body = claimsJws.getBody();
             String userInfoJson = body.get(JWT_PAYLOAD_USER_KEY).toString();
             return JSONUtil.toBean(userInfoJson, userType);
-        }catch (Exception e){
-            // 令牌解析异常就抛自定义的异常
+        } catch (Exception e) {
             throw new JWTParseException("非法令牌");
         }
-
     }
-
-
-
 }
-
-

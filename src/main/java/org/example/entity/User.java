@@ -3,70 +3,65 @@ package org.example.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * <p>
- * 用户表
- * </p>
- *
- * @author 曹业航
- * @since 2025-10-25
+ * 用户表实体，对应 sys_user。
  */
 @TableName("sys_user")
 public class User implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
     /**
-     * 主键ID
+     * 用户主键。
      */
     @TableId(value = "user_id", type = IdType.AUTO)
     private Integer userId;
 
     /**
-     * 账户名称
+     * 用户昵称。
      */
     private String nickname;
 
     /**
-     * 账户昵称
+     * 登录账号。
      */
     private String username;
 
     /**
-     * 账户密码
+     * 登录密码。
      */
     private String password;
 
     /**
-     * 邮箱
+     * 邮箱。
      */
     private String email;
 
     /**
-     * 手机号码
+     * 手机号。
      */
     private String phone;
 
     /**
-     * 性别：0保密，1男，2女
+     * 性别：0 保密，1 男，2 女。
      */
     private Integer sex;
 
     /**
-     * 备注
+     * 备注。
      */
     private String remark;
 
     /**
-     * 创建时间
+     * 创建时间。
      */
     private Date createTime;
 
     /**
-     * 更新时间
+     * 更新时间。
      */
     private Date updateTime;
 
@@ -77,6 +72,7 @@ public class User implements Serializable {
     public void setUserId(Integer userId) {
         this.userId = userId;
     }
+
     public String getNickname() {
         return nickname;
     }
@@ -84,6 +80,7 @@ public class User implements Serializable {
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+
     public String getUsername() {
         return username;
     }
@@ -91,6 +88,7 @@ public class User implements Serializable {
     public void setUsername(String username) {
         this.username = username;
     }
+
     public String getPassword() {
         return password;
     }
@@ -98,6 +96,7 @@ public class User implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+
     public String getEmail() {
         return email;
     }
@@ -105,6 +104,7 @@ public class User implements Serializable {
     public void setEmail(String email) {
         this.email = email;
     }
+
     public String getPhone() {
         return phone;
     }
@@ -112,6 +112,7 @@ public class User implements Serializable {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
     public Integer getSex() {
         return sex;
     }
@@ -119,6 +120,7 @@ public class User implements Serializable {
     public void setSex(Integer sex) {
         this.sex = sex;
     }
+
     public String getRemark() {
         return remark;
     }
@@ -126,6 +128,7 @@ public class User implements Serializable {
     public void setRemark(String remark) {
         this.remark = remark;
     }
+
     public Date getCreateTime() {
         return createTime;
     }
@@ -133,6 +136,7 @@ public class User implements Serializable {
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
+
     public Date getUpdateTime() {
         return updateTime;
     }
@@ -144,16 +148,16 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "User{" +
-            "userId=" + userId +
-            ", nickname=" + nickname +
-            ", username=" + username +
-            ", password=" + password +
-            ", email=" + email +
-            ", phone=" + phone +
-            ", sex=" + sex +
-            ", remark=" + remark +
-            ", createTime=" + createTime +
-            ", updateTime=" + updateTime +
-        "}";
+                "userId=" + userId +
+                ", nickname=" + nickname +
+                ", username=" + username +
+                ", password=" + password +
+                ", email=" + email +
+                ", phone=" + phone +
+                ", sex=" + sex +
+                ", remark=" + remark +
+                ", createTime=" + createTime +
+                ", updateTime=" + updateTime +
+                "}";
     }
 }

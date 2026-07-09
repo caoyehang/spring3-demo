@@ -10,27 +10,29 @@
         <result property="phone" column="phone"></result>
         <result property="sex" column="sex"></result>
         <result property="createTime" column="create_time"></result>
+        <result property="updateTime" column="update_time"></result>
         <result property="remark" column="remark"></result>
     </resultMap>
-    <!--  分页查询  -->
+
+    <!-- 分页查询用户，按昵称、账号、手机号、创建时间区间动态筛选。 -->
     <select id="queryUser" resultMap="userRoleDto">
         select su.*
         from sys_user su
-        WHERE 1=1
+        where 1 = 1
         <if test="nickname != null and nickname != ''">
-            AND su.nickname like concat('%', #{nickname}, '%')
+            and su.nickname like concat('%', #{nickname}, '%')
         </if>
         <if test="username != null and username != ''">
-            AND su.username like concat('%', #{username}, '%')
+            and su.username like concat('%', #{username}, '%')
         </if>
         <if test="phone != null and phone != ''">
-            AND su.phone like concat('%', #{phone}, '%')
+            and su.phone like concat('%', #{phone}, '%')
         </if>
-        <if test="startTime != null and startTime != ''"> <!-- 开始时间检索 小于等于 -->
-            AND date_format(su.create_time, '%Y%m%d') &gt;= date_format(#{startTime}, '%Y%m%d')
+        <if test="startTime != null and startTime != ''">
+            and date_format(su.create_time, '%Y%m%d') &gt;= date_format(#{startTime}, '%Y%m%d')
         </if>
-        <if test="endTime != null and endTime != ''"> <!-- 结束时间检索 大于等于 -->
-            AND date_format(su.create_time, '%Y%m%d') &lt;= date_format(#{endTime}, '%Y%m%d')
+        <if test="endTime != null and endTime != ''">
+            and date_format(su.create_time, '%Y%m%d') &lt;= date_format(#{endTime}, '%Y%m%d')
         </if>
     </select>
 </mapper>

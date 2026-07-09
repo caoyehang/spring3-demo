@@ -7,18 +7,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 作者：Leo
- * 描述：永无bug
+ * MyBatis-Plus 配置。
  */
 @Configuration
 public class MybatisPlusConfig {
+    /**
+     * 注册分页插件，Page 参数会被 MyBatis-Plus 自动识别并拼接分页 SQL。
+     */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        // 如果是 MySQL
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }
-
 }
-

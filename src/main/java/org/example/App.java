@@ -5,13 +5,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * 作者：Leo
- * 描述：永无bug
+ * 项目启动类。
  */
 @SpringBootApplication
 @MapperScan(basePackages = {"org.example.mapper"})
 public class App {
     public static void main(String[] args) {
-        SpringApplication.run(App.class,args);
+        SpringApplication.run(App.class, args);
     }
 }

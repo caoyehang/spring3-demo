@@ -1,45 +1,46 @@
 server:
-  port: 9999  # springboot 启动端口
+  port: 9999 # Spring Boot 启动端口
   servlet:
-    context-path: / #配置用于设置应用程序的根路径。
+    context-path: / # 应用根路径
+
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/admin?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=utf-8 # 使用druid连接数据源
+    url: jdbc:mysql://localhost:3306/admin?allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=utf-8 # MySQL 连接地址
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.alibaba.druid.pool.DruidDataSource  # 指定 Druid 数据源类型
-    # Druid 数据源配置
+    type: com.alibaba.druid.pool.DruidDataSource # 使用 Druid 数据源
     druid:
-      initial-size: 10  # 初始化连接数
-      min-idle: 5      # 最小空闲连接数
-      max-active: 20   # 最大连接数
-      max-wait: 60000  # 获取连接的最大等待时间（毫秒）
-      validation-query: SELECT 1  # 用于验证连接是否有效的SQL语句
-      test-while-idle: true  # 是否在空闲时检测连接
-      time-between-eviction-runs-millis: 30000  # 空闲连接检测的间隔时间
-      min-evictable-idle-time-millis: 60000  # 最小空闲连接存活时间
-      remove-abandoned: true  # 是否删除废弃连接
-      remove-abandoned-timeout: 1800  # 废弃连接的超时时间（秒）
-      log-abandoned: true  # 是否记录废弃连接日志
+      initial-size: 10 # 初始化连接数
+      min-idle: 5 # 最小空闲连接数
+      max-active: 20 # 最大连接数
+      max-wait: 60000 # 获取连接最大等待时间，单位毫秒
+      validation-query: SELECT 1 # 连接有效性检测 SQL
+      test-while-idle: true # 空闲时检测连接
+      time-between-eviction-runs-millis: 30000 # 空闲连接检测间隔，单位毫秒
+      min-evictable-idle-time-millis: 60000 # 最小空闲存活时间，单位毫秒
+      remove-abandoned: true # 是否清理废弃连接
+      remove-abandoned-timeout: 1800 # 废弃连接超时时间，单位秒
+      log-abandoned: true # 是否记录废弃连接日志
   data:
     redis:
-      host: localhost # redis 地址
-      port: 6379    # redis 端口
-      open: true # 是否开启redis缓存 true开启 false关闭
-      database: 0  # 设置数据库的数量，默认数据库为0
-      timeout: 6000ms # 连接超时时长(毫秒)
+      host: localhost # Redis 地址
+      port: 6379 # Redis 端口
+      open: true # 是否开启 Redis 缓存
+      database: 0 # Redis 数据库编号
+      timeout: 6000ms # 连接超时时间
       lettuce:
         pool:
-          max-active: 100 # 连接池最大连接数(使用负值表示没有限制)
-          max-wait: -1ms # 连接池最大阻塞等的时间(使用负值表示没有限制)
-          max-idle: 20 # 连接池中的最大空闲连接
-          min-idle: 5 # 连接池中的最小空闲连接
+          max-active: 100 # 连接池最大连接数
+          max-wait: -1ms # 连接池最大阻塞等待时间，-1 表示不限制
+          max-idle: 20 # 连接池最大空闲连接数
+          min-idle: 5 # 连接池最小空闲连接数
   jackson:
-    date-format: yyyy-MM-dd HH:mm:ss # 时间格式
-    time-zone: Asia/Chongqing # 时区：亚洲重庆
+    date-format: yyyy-MM-dd HH:mm:ss # JSON 时间格式
+    time-zone: Asia/Chongqing # JSON 时间时区
+
 mybatis-plus:
-  mapper-locations: classpath*:mappers/*.xml # 扫描xml文件
+  mapper-locations: classpath*:mappers/*.xml # Mapper XML 扫描路径
   configuration:
-    auto-mapping-behavior: full # 自动映射任何复杂的结果
-    map-underscore-to-camel-case: true # 开启驼峰功能
+    auto-mapping-behavior: full # 自动映射复杂结果
+    map-underscore-to-camel-case: true # 开启下划线转驼峰

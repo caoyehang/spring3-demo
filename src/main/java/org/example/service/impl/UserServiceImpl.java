@@ -1,7 +1,6 @@
 package org.example.service.impl;
 
-import com.alibaba.druid.util.StringUtils;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.example.Vo.ApiRest;
@@ -11,103 +10,84 @@ import org.example.mapper.UserMapper;
 import org.example.service.IUserService;
 import org.example.utils.JwtUtils;
 import org.example.utils.RedisUtils;
+import org.example.utils.RsaUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.example.utils.RsaUtils;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import org.springframework.util.StringUtils;
+
 import java.security.PrivateKey;
 
 /**
+ * 用户服务实现。
  * <p>
- * 用户表 服务实现类
- * </p>
- *
- * @author 曹业航
- * @since 2025-10-25
+ * 主要负责登录校验、JWT 生成和用户分页查询。
  */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
-    // 注入mapper层
+    private final UserMapper userMapper;
+    private final RedisUtils redisUtils;
+
     @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    public RedisUtils redisUtils;
+    public UserServiceImpl(UserMapper userMapper, RedisUtils redisUtils) {
+        this.userMapper = userMapper;
+        this.redisUtils = redisUtils;
+    }
+
     /**
-     * 登录
-     * @param username
-     * @param password
-     * @param uuid
-     * @param code
-     * @return
+     * 登录流程：校验入参 -> 校验账号密码 -> 校验验证码 -> 生成 JWT。
      */
     @Override
-    public ApiRest login(String username, String password, String uuid, String code) {
-        // 判断 用户名或者密码是否为空
-        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+    public ApiRest<String> login(String username, String password, String uuid, String code) {
+        if (!StringUtils.hasText(username) || !StringUtils.hasText(password)) {
             return ApiRest.failure(ApiErrorEnum.LOGIN_USERNAME_NULL);
         }
-        // 判断 uuid或者验证码是否为空
-        if (StringUtils.isEmpty(uuid) || StringUtils.isEmpty(code)) {
+        if (!StringUtils.hasText(uuid) || !StringUtils.hasText(code)) {
             return ApiRest.failure(ApiErrorEnum.LOGIN_CODE_UUID_NULL);
         }
-        // 使用mybatis plus快捷查询，根据用户名查询
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", username);
-        User users = userMapper.selectOne(queryWrapper);
-        // 判断查询结果，如果用户名查询不出来
-        if (users == null) {
+
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUsername, username);
+        User user = userMapper.selectOne(queryWrapper);
+        if (user == null || !password.equals(user.getPassword())) {
             return ApiRest.failure(ApiErrorEnum.LOGIN_USERNAME_PASSWORD_INVALID);
         }
-        // 比较密码 如果密码不正确
-        if (!users.getPassword().equals(password)) {
-            return ApiRest.failure(ApiErrorEnum.LOGIN_USERNAME_PASSWORD_INVALID);
-        }
-        // 根据uuid查询 验证码
-        String verifyKey = redisUtils.get(uuid);
-        // 查询不到就是过期
-        if (StringUtils.isEmpty(verifyKey)) {
+
+        String verifyCode = redisUtils.get(uuid);
+        if (!StringUtils.hasText(verifyCode)) {
             return ApiRest.failure(ApiErrorEnum.LOGIN_UUID_INVALID);
         }
-        // 判断验证码是否正确
-        if (!verifyKey.equals(code)) {
+        if (!verifyCode.equalsIgnoreCase(code)) {
             return ApiRest.failure(ApiErrorEnum.LOGIN_CODE_INVALID);
         }
-        // 全部通过后，颁发jwt令牌
-        PrivateKey privateKey = null;
+
         try {
-            ClassPathResource classPathResource = new ClassPathResource("key/pri_rsa");
-            InputStream is = classPathResource.getInputStream();
-            ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
-            byte[] buff = new byte[1024];
-            int rc;
-            while ((rc = is.read(buff, 0, 1024)) > 0) {
-                swapStream.write(buff, 0, rc);
-            }
-            byte[] keyBytes = swapStream.toByteArray();
-            // 通过文件路径获取私钥
-            privateKey = RsaUtils.getPrivateKey(keyBytes);
+            PrivateKey privateKey = loadPrivateKey();
+            String token = JwtUtils.generateTokenExpireInMinutes(user, privateKey, 120);
+            return ApiRest.success(token);
         } catch (Exception e) {
-            e.printStackTrace();
+            return ApiRest.failure(ApiErrorEnum.SYSTEM_ERROR, e.getMessage());
         }
-        // 使用私钥加密token 单位 分钟
-        String token = JwtUtils.generateTokenExpireInMinutes(users, privateKey, 120);
-        // 全部成功返回token
-        return ApiRest.success(token);
     }
+
     /**
-     * 登录
-     * @param username
-     * @param nickname
-     * @param phone
-     * @param startTime
-     * @param endTime
-     * @return
+     * 从 classpath 读取 RSA 私钥，用于签发 JWT。
+     */
+    private PrivateKey loadPrivateKey() throws Exception {
+        ClassPathResource classPathResource = new ClassPathResource("key/pri_rsa");
+        return RsaUtils.getPrivateKey(classPathResource.getContentAsByteArray());
+    }
+
+    /**
+     * 用户分页查询，具体 SQL 在 UserMapper.xml 中维护。
      */
     @Override
-    public Page<User> queryUser(Page page, String nickname, String username, String phone, String startTime, String endTime) {
-        Page<User> userPage = userMapper.queryUser(page, nickname, username, phone, startTime, endTime);
-        return userPage;
+    public Page<User> queryUser(Page<User> page,
+                                String nickname,
+                                String username,
+                                String phone,
+                                String startTime,
+                                String endTime) {
+        return userMapper.queryUser(page, nickname, username, phone, startTime, endTime);
     }
 }

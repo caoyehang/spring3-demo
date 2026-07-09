@@ -1,25 +1,26 @@
 package org.example.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.example.Vo.ApiRest;
 import org.example.entity.User;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 /**
- * <p>
- * 用户表 服务类
- * </p>
- *
- * @author 曹业航
- * @since 2025-10-25
+ * 用户服务接口。
  */
 public interface IUserService extends IService<User> {
     /**
-     * 登录
+     * 登录校验成功后返回 JWT token。
      */
-    public ApiRest login(String username, String password, String uuid, String code);
+    ApiRest<String> login(String username, String password, String uuid, String code);
+
     /**
-     * 分页查询
+     * 按条件分页查询用户。
      */
-    Page<User> queryUser(Page page,String nickname ,String username,String phone,String startTime,String endTime);
+    Page<User> queryUser(Page<User> page,
+                         String nickname,
+                         String username,
+                         String phone,
+                         String startTime,
+                         String endTime);
 }
