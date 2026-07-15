@@ -15,6 +15,11 @@ public interface IUserService extends IService<User> {
     ApiRest<String> login(String username, String password, String uuid, String code);
 
     /**
+     * 退出登录，当前实现由前端删除 token，后端返回统一成功响应。
+     */
+    ApiRest<Void> logout();
+
+    /**
      * 按条件分页查询用户。
      */
     Page<User> queryUser(Page<User> page,

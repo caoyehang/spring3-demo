@@ -70,6 +70,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
     }
 
+    @Override
+    public ApiRest<Void> logout() {
+        return ApiRest.success();
+    }
+
     /**
      * 从 classpath 读取 RSA 私钥，用于签发 JWT。
      */

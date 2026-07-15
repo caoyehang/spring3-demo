@@ -8,11 +8,11 @@ import org.example.entity.User;
 import org.example.service.IUserService;
 import org.example.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,15 +72,22 @@ public class UserController {
     /**
      * 用户登录。
      * <p>
-     * 保留 GET 兼容当前页面，同时允许 POST，后续前端可以平滑切换到 POST。
+     * 使用 GET 请求提交登录参数。
      */
-    @RequestMapping(value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
+    @GetMapping(value = "/login")
     public ApiRest<String> login(
             @RequestParam("username") String username,
             @RequestParam("password") String password,
             @RequestParam("uuid") String uuid,
             @RequestParam("code") String code) {
         return userService.login(username, password, uuid, code);
+    }
+
+    @PostMapping("/logout")
+    public ApiRest<Void> logout() {
+        ApiRest<Void> result = userService.logout();
+        SecurityContextHolder.clearContext();
+        return result;
     }
 
     /**
